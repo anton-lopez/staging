@@ -4,18 +4,43 @@
     {% for review in reviews %}
         <article class="media content-section">
             <img class="rounded-circle article-img" src="{{ review.author.profile.image.url }}">
-            <div class="media-body ">
+            <div class="media-body">
                 <div class="article-metadata">
                     <a class="mr-2" href="{% url 'user-posts' review.author.username %}">{{ review.author }}</a>
                     <small class="text-muted">{{ review.date_posted|date:"F d, Y" }}</small>
                 </div>
                 <h2><a class="article-title" href="{% url 'post-detail' review.id %}">{{ review.title }}</a></h2>
                 <p class="article-content">{{ review.content }}</p>
+
+                {% if review.images.count > 0 %}
+                    <div class="post-image-gallery">
+                        {% if review.images.count == 1 %}
+                            <a href="{% url 'post-detail' review.id %}">
+                                <img src="{{ review.images.first.image.url }}" class="single-post-image" alt="Post Image">
+                            </a>
+                        {% else %}
+                            <div class="post-image-grid">
+                                {% for image in review.images.all|slice:":4" %}
+                                    <div class="post-image-container">
+                                        <a href="{% url 'post-detail' review.id %}">
+                                            <img src="{{ image.image.url }}" class="post-gallery-image" alt="Post Image">
+                                            {% if forloop.counter == 4 and review.images.count > 4 %}
+                                                <div class="image-overlay">
+                                                    <span>+{{ review.images.count|add:"-4" }}</span>
+                                                </div>
+                                            {% endif %}
+                                        </a>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
             </div>
         </article>
     {% endfor %}
-    {% if is_paginated %}
 
+    {% if is_paginated %}
         {% if page_obj.has_previous %}
             <a class="btn btn-outline-info mb-4" href="?page=1">First</a>
             <a class="btn btn-outline-info mb-4" href="?page={{ page_obj.previous_page_number }}">Previous</a>
@@ -33,6 +58,5 @@
             <a class="btn btn-outline-info mb-4" href="?page={{ page_obj.next_page_number }}">Next</a>
             <a class="btn btn-outline-info mb-4" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
         {% endif %}
-
     {% endif %}
 {% endblock content %}
