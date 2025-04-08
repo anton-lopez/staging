@@ -54,6 +54,16 @@
                         {% endif %}
                         <a class="nav-item nav-link" href="{% url 'post-create' %}">New Review</a>
                         <a class="nav-item nav-link" href="{% url 'profile' %}">Profile</a>
+                        <!-- Add room assignment status -->
+                        {% if user.profile.assigned_room %}
+                            <span class="nav-item nav-link text-success">
+                                <small>Room: {{ user.profile.assigned_room.room_number }}</small>
+                            </span>
+                        {% else %}
+                            <span class="nav-item nav-link text-warning">
+                                <small>No Room Assigned</small>
+                            </span>
+                        {% endif %}
                         <form method="POST" action="{% url 'logout' %}" style="display: inline;">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-outline-light btn-sm nav-item nav-link">Logout</button>

@@ -180,13 +180,20 @@ class PostDetailView(DetailView):
 
 class PostCreateView(LoginRequiredMixin, View):
     def get(self, request, room_id=None):
-        post_form = PostForm()
+        # Check if user has an assigned room
+        if not request.user.profile.assigned_room:
+            messages.error(request, 'You must be assigned to a room in your profile before you can post a review.')
+            return redirect('profile')
+
+        # Pre-select the room based on user's profile
+        post_form = PostForm(initial={'room': request.user.profile.assigned_room})
         image_form = PostImageForm()
 
-        # Pre-select the room if provided
-        if room_id:
-            room = get_object_or_404(Room, pk=room_id)
-            post_form = PostForm(initial={'room': room})
+        # Disable and mark as readonly the room field
+        post_form.fields['room'].disabled = True
+        post_form.fields['room'].widget.attrs.update({'readonly': True})
+        # Remove the required attribute from the room field
+        post_form.fields['room'].required = False
 
         return render(request, 'review/post_form.html', {
             'post_form': post_form,
@@ -194,12 +201,26 @@ class PostCreateView(LoginRequiredMixin, View):
         })
 
     def post(self, request, room_id=None):
-        post_form = PostForm(request.POST)
+        # Check if user has an assigned room
+        if not request.user.profile.assigned_room:
+            messages.error(request, 'You must be assigned to a room in your profile before you can post a review.')
+            return redirect('profile')
+
+        # Create a modified POST copy that we can change
+        post_data = request.POST.copy()
+
+        # Force-set the room value to the user's assigned room
+        # This handles cases where the disabled field isn't submitted
+        post_data['room'] = request.user.profile.assigned_room.id
+
+        post_form = PostForm(post_data)
         image_form = PostImageForm(request.POST, request.FILES)
 
         if post_form.is_valid():
             post = post_form.save(commit=False)
             post.author = request.user
+            # Always use the room from the profile
+            post.room = request.user.profile.assigned_room
             post.save()
 
             # Handle image uploads
@@ -223,6 +244,12 @@ class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, View):
         post_form = PostForm(instance=post)
         image_form = PostImageForm()
 
+        # Disable the room field and mark as readonly
+        post_form.fields['room'].disabled = True
+        post_form.fields['room'].widget.attrs.update({'readonly': True})
+        # Remove the required attribute from the room field
+        post_form.fields['room'].required = False
+
         return render(request, 'review/post_update.html', {
             'post_form': post_form,
             'image_form': image_form,
@@ -231,11 +258,21 @@ class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, View):
 
     def post(self, request, pk):
         post = get_object_or_404(Post, pk=pk)
-        post_form = PostForm(request.POST, instance=post)
+
+        # Create a modified POST copy
+        post_data = request.POST.copy()
+
+        # Force-set the room value to the original post's room
+        post_data['room'] = post.room.id
+
+        post_form = PostForm(post_data, instance=post)
         image_form = PostImageForm(request.POST, request.FILES)
 
         if post_form.is_valid():
-            post = post_form.save()
+            updated_post = post_form.save(commit=False)
+            # Ensure the room hasn't been changed
+            updated_post.room = post.room
+            updated_post.save()
 
             # Handle the file upload
             files = request.FILES.getlist('image')

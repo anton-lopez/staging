@@ -41,9 +41,11 @@ class PostForm(forms.ModelForm):
         }
         labels = {
             'liked': 'I liked this room',
+            'room': 'Room (set from your profile)',
         }
         help_texts = {
-            'liked': 'Check this box if you had a positive experience with this room.'
+            'liked': 'Check this box if you had a positive experience with this room.',
+            'room': 'This is automatically set from your profile. To change it, update your profile.',
         }
 
     def __init__(self, *args, **kwargs):
