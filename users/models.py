@@ -21,13 +21,34 @@ class Profile(models.Model):
     assigned_room = models.ForeignKey(Room, on_delete=models.SET_NULL, null=True, blank=True,
                                       related_name='assigned_students')
 
+    # Track the previous room for logging
+    _original_assigned_room = None
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Store the original room when instance is loaded
+        self._original_assigned_room = self.assigned_room
+
     def __str__(self):
         return f'{self.user.username} Profile'
 
     # Makes it so images are saved smaller
     def save(self, *args, **kwargs):
+        # Check if this is an existing instance and if room has changed
+        if self.pk and self.assigned_room != self._original_assigned_room:
+            # Create log entry for room change
+            RoomAssignmentLog.objects.create(
+                user=self.user,
+                previous_room=self._original_assigned_room,
+                new_room=self.assigned_room
+            )
+
         super().save(*args, **kwargs)
 
+        # After saving, update the original room to the current one
+        self._original_assigned_room = self.assigned_room
+
+        # Process profile image
         img = Image.open(self.image.path)
 
         if img.height > 300 or img.width > 300:
