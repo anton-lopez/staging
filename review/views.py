@@ -2,10 +2,157 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.models import User
 from django.contrib import messages
-from django.views.generic import (ListView, DetailView, DeleteView)
+from django.views.generic import (ListView, DetailView, DeleteView, CreateView, UpdateView)
 from django.views import View
-from .models import Post, PostImage
-from .forms import PostForm, PostImageForm
+from django.urls import reverse_lazy, reverse
+from django.contrib.admin.views.decorators import staff_member_required
+from django.utils.decorators import method_decorator
+from .models import Post, PostImage, Dorm, Room
+from .forms import PostForm, PostImageForm, DormForm, RoomForm
+
+
+class DormListView(ListView):
+    model = Dorm
+    template_name = 'review/dorm_list.html'
+    context_object_name = 'dorms'
+    ordering = ['name']
+
+
+class DormDetailView(DetailView):
+    model = Dorm
+    template_name = 'review/dorm_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        rooms = Room.objects.filter(dorm=self.object).order_by('room_number')
+        rooms_with_stats = []
+
+        for room in rooms:
+            reviews = room.reviews.all()
+            total_reviews = reviews.count()
+            liked_reviews = sum(1 for review in reviews if review.liked)
+
+            like_percentage = 0
+            if total_reviews > 0:
+                like_percentage = (liked_reviews / total_reviews) * 100
+
+            rooms_with_stats.append({
+                'room': room,
+                'total_reviews': total_reviews,
+                'liked_reviews': liked_reviews,
+                'like_percentage': like_percentage
+            })
+
+        context['rooms_with_stats'] = rooms_with_stats
+        return context
+
+
+@method_decorator(staff_member_required, name='dispatch')
+class DormCreateView(LoginRequiredMixin, CreateView):
+    model = Dorm
+    form_class = DormForm
+    template_name = 'review/dorm_form.html'
+    success_url = reverse_lazy('dorm-list')
+
+
+@method_decorator(staff_member_required, name='dispatch')
+class DormUpdateView(LoginRequiredMixin, UpdateView):
+    model = Dorm
+    form_class = DormForm
+    template_name = 'review/dorm_form.html'
+
+    def get_success_url(self):
+        return reverse('dorm-detail', kwargs={'pk': self.object.pk})
+
+
+@method_decorator(staff_member_required, name='dispatch')
+class DormDeleteView(LoginRequiredMixin, DeleteView):
+    model = Dorm
+    template_name = 'review/dorm_confirm_delete.html'
+    success_url = reverse_lazy('dorm-list')
+
+
+class RoomListView(ListView):
+    model = Room
+    template_name = 'review/room_list.html'
+    context_object_name = 'rooms'
+
+    def get_queryset(self):
+        return Room.objects.all().order_by('dorm__name', 'room_number')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        rooms_with_stats = []
+
+        for room in context['rooms']:
+            reviews = room.reviews.all()
+            total_reviews = reviews.count()
+            liked_reviews = sum(1 for review in reviews if review.liked)
+
+            like_percentage = 0
+            if total_reviews > 0:
+                like_percentage = (liked_reviews / total_reviews) * 100
+
+            rooms_with_stats.append({
+                'room': room,
+                'total_reviews': total_reviews,
+                'liked_reviews': liked_reviews,
+                'like_percentage': like_percentage
+            })
+
+        context['rooms_with_stats'] = rooms_with_stats
+        return context
+
+
+class RoomDetailView(DetailView):
+    model = Room
+    template_name = 'review/room_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['reviews'] = Post.objects.filter(room=self.object).order_by('-date_posted')
+        context['like_count'] = Post.objects.filter(room=self.object, liked=True).count()
+        context['total_reviews'] = context['reviews'].count()
+        if context['total_reviews'] > 0:
+            context['like_percentage'] = (context['like_count'] / context['total_reviews']) * 100
+        else:
+            context['like_percentage'] = 0
+        return context
+
+
+@method_decorator(staff_member_required, name='dispatch')
+class RoomCreateView(LoginRequiredMixin, CreateView):
+    model = Room
+    form_class = RoomForm
+    template_name = 'review/room_form.html'
+
+    def get_success_url(self):
+        return reverse('dorm-detail', kwargs={'pk': self.object.dorm.pk})
+
+    def get_initial(self):
+        initial = super().get_initial()
+        if 'dorm_id' in self.kwargs:
+            initial['dorm'] = get_object_or_404(Dorm, pk=self.kwargs['dorm_id'])
+        return initial
+
+
+@method_decorator(staff_member_required, name='dispatch')
+class RoomUpdateView(LoginRequiredMixin, UpdateView):
+    model = Room
+    form_class = RoomForm
+    template_name = 'review/room_form.html'
+
+    def get_success_url(self):
+        return reverse('room-detail', kwargs={'pk': self.object.pk})
+
+
+@method_decorator(staff_member_required, name='dispatch')
+class RoomDeleteView(LoginRequiredMixin, DeleteView):
+    model = Room
+    template_name = 'review/room_confirm_delete.html'
+
+    def get_success_url(self):
+        return reverse('dorm-detail', kwargs={'pk': self.object.dorm.pk})
 
 
 class PostListView(ListView):
@@ -32,15 +179,21 @@ class PostDetailView(DetailView):
 
 
 class PostCreateView(LoginRequiredMixin, View):
-    def get(self, request):
+    def get(self, request, room_id=None):
         post_form = PostForm()
         image_form = PostImageForm()
+
+        # Pre-select the room if provided
+        if room_id:
+            room = get_object_or_404(Room, pk=room_id)
+            post_form = PostForm(initial={'room': room})
+
         return render(request, 'review/post_form.html', {
             'post_form': post_form,
             'image_form': image_form
         })
 
-    def post(self, request):
+    def post(self, request, room_id=None):
         post_form = PostForm(request.POST)
         image_form = PostImageForm(request.POST, request.FILES)
 
@@ -55,7 +208,7 @@ class PostCreateView(LoginRequiredMixin, View):
                 # Create a new PostImage with an empty caption
                 PostImage.objects.create(post=post, image=img, caption='')
 
-            messages.success(request, 'Post created successfully!')
+            messages.success(request, 'Review posted successfully!')
             return redirect('post-detail', pk=post.pk)
 
         return render(request, 'review/post_form.html', {
@@ -90,7 +243,7 @@ class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, View):
                 # Create a new PostImage with an empty caption
                 PostImage.objects.create(post=post, image=f, caption='')
 
-            messages.success(request, 'Post updated successfully!')
+            messages.success(request, 'Review updated successfully!')
             return redirect('post-detail', pk=post.pk)
 
         return render(request, 'review/post_update.html', {
@@ -134,6 +287,7 @@ class PostImageDeleteView(LoginRequiredMixin, UserPassesTestMixin, View):
 def home(request):
     context = {
         'reviews': Post.objects.all(),
+        'dorms': Dorm.objects.all(),
     }
     return render(request, 'review/home.html', context)
 

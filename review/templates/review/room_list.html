@@ -1,0 +1,54 @@
+{% extends 'review/base.html' %}
+{% block content %}
+    <div class="content-section">
+        <h1>All Rooms</h1>
+        
+        {% if user.is_staff %}
+            <div class="mb-3">
+                <a class="btn btn-primary" href="{% url 'room-create' %}">Add New Room</a>
+            </div>
+        {% endif %}
+        
+        <div class="row">
+            {% for room_data in rooms_with_stats %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        {% if room_data.room.image %}
+                            <img src="{{ room_data.room.image.url }}" class="card-img-top" alt="Room {{ room_data.room.room_number }}" style="height: 150px; object-fit: cover;">
+                        {% else %}
+                            <div class="card-img-top bg-light d-flex justify-content-center align-items-center" style="height: 150px;">
+                                <span class="text-muted">No Image</span>
+                            </div>
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ room_data.room.dorm.name }} - Room {{ room_data.room.room_number }}</h5>
+                            <p class="card-text"><small class="text-muted">Floor {{ room_data.room.floor }}</small></p>
+                            <p class="card-text">{{ room_data.room.description|truncatechars:100 }}</p>
+
+                            {% if room_data.total_reviews > 0 %}
+                                <p class="card-text">
+                                    <small class="text-muted">
+                                        {{ room_data.total_reviews }} review{{ room_data.total_reviews|pluralize }},
+                                        {{ room_data.like_percentage|floatformat:0 }}% liked
+                                    </small>
+                                </p>
+                            {% else %}
+                                <p class="card-text"><small class="text-muted">No reviews yet</small></p>
+                            {% endif %}
+
+                            <a href="{% url 'room-detail' room_data.room.id %}" class="btn btn-outline-info">View Details</a>
+                            {% if user.is_staff %}
+                                <a href="{% url 'room-update' room_data.room.id %}" class="btn btn-outline-secondary btn-sm">Edit</a>
+                                <a href="{% url 'room-delete' room_data.room.id %}" class="btn btn-outline-danger btn-sm">Delete</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col">
+                    <p>No rooms have been added yet.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock content %}

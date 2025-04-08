@@ -8,8 +8,15 @@
                 <div class="article-metadata">
                     <a class="mr-2" href="{% url 'user-posts' review.author.username %}">{{ review.author }}</a>
                     <small class="text-muted">{{ review.date_posted|date:"F d, Y" }}</small>
+
+                    {% if review.liked %}
+                        <span class="badge badge-success ml-2" style="padding: 5px 10px; font-size: 14px;">Liked this room</span>
+                    {% endif %}
                 </div>
                 <h2><a class="article-title" href="{% url 'post-detail' review.id %}">{{ review.title }}</a></h2>
+                {% if review.room %}
+                    <p class="text-muted mb-2">Review for <a href="{% url 'room-detail' review.room.id %}">{{ review.room.dorm.name }} - Room {{ review.room.room_number }}</a></p>
+                {% endif %}
                 <p class="article-content">{{ review.content }}</p>
 
                 {% if review.images.count > 0 %}

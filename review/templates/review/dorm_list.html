@@ -1,0 +1,43 @@
+{% extends 'review/base.html' %}
+{% block content %}
+    <div class="content-section">
+        <h1>Campus Dorms</h1>
+        {% if user.is_staff %}
+            <div class="mb-3">
+                <a class="btn btn-primary" href="{% url 'dorm-create' %}">Add New Dorm</a>
+            </div>
+        {% endif %}
+        
+        <div class="row">
+            {% for dorm in dorms %}
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        {% if dorm.image %}
+                            <img src="{{ dorm.image.url }}" class="card-img-top" alt="{{ dorm.name }}" style="height: 200px; object-fit: cover;">
+                        {% else %}
+                            <div class="card-img-top bg-light d-flex justify-content-center align-items-center" style="height: 200px;">
+                                <span class="text-muted">No Image</span>
+                            </div>
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ dorm.name }}</h5>
+                            <p class="card-text">{{ dorm.description|truncatechars:100 }}</p>
+                            <p class="card-text">
+                                <small class="text-muted">{{ dorm.rooms.count }} room{{ dorm.rooms.count|pluralize }}</small>
+                            </p>
+                            <a href="{% url 'dorm-detail' dorm.id %}" class="btn btn-outline-info">View Details</a>
+                            {% if user.is_staff %}
+                                <a href="{% url 'dorm-update' dorm.id %}" class="btn btn-outline-secondary">Edit</a>
+                                <a href="{% url 'dorm-delete' dorm.id %}" class="btn btn-outline-danger">Delete</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col">
+                    <p>No dorms have been added yet.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock content %}

@@ -1,5 +1,5 @@
 from django import forms
-from .models import Post, PostImage
+from .models import Post, PostImage, Dorm, Room
 
 
 class MultipleFileInput(forms.ClearableFileInput):
@@ -20,10 +20,39 @@ class MultipleFileField(forms.FileField):
         return result
 
 
+class DormForm(forms.ModelForm):
+    class Meta:
+        model = Dorm
+        fields = ['name', 'description', 'image']
+
+
+class RoomForm(forms.ModelForm):
+    class Meta:
+        model = Room
+        fields = ['dorm', 'room_number', 'floor', 'description', 'image']
+
+
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
-        fields = ['title', 'content']
+        fields = ['title', 'content', 'room', 'liked']
+        widgets = {
+            'liked': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+        labels = {
+            'liked': 'I liked this room',
+        }
+        help_texts = {
+            'liked': 'Check this box if you had a positive experience with this room.'
+        }
+
+    def __init__(self, *args, **kwargs):
+        super(PostForm, self).__init__(*args, **kwargs)
+        self.fields['room'].queryset = Room.objects.all().order_by('dorm__name', 'room_number')
+        self.fields['room'].empty_label = "Select a room"
+        # Make sure the liked field appears after content
+        field_order = ['title', 'content', 'room', 'liked']
+        self.order_fields(field_order)
 
 
 class PostImageForm(forms.ModelForm):

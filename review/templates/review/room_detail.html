@@ -1,0 +1,102 @@
+{% extends 'review/base.html' %}
+{% block content %}
+    <div class="content-section">
+        <div class="media">
+            {% if object.image %}
+                <img class="rounded mr-3" src="{{ object.image.url }}" alt="Room {{ object.room_number }}" style="width: 200px; height: 200px; object-fit: cover;">
+            {% endif %}
+            <div class="media-body">
+                <h2 class="mt-0">{{ object.dorm.name }} - Room {{ object.room_number }}</h2>
+                <p class="text-muted">Floor {{ object.floor }}</p>
+                <p>{{ object.description }}</p>
+                
+                <div class="mt-2">
+                    <a href="{% url 'dorm-detail' object.dorm.id %}" class="btn btn-outline-secondary">Back to {{ object.dorm.name }}</a>
+                    <a href="{% url 'room-review-create' object.id %}" class="btn btn-outline-info">Write a Review</a>
+                    
+                    {% if user.is_staff %}
+                        <a href="{% url 'room-update' object.id %}" class="btn btn-outline-secondary">Edit Room</a>
+                        <a href="{% url 'room-delete' object.id %}" class="btn btn-outline-danger">Delete Room</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <hr>
+        
+        <div class="room-stats mt-4 mb-4">
+            <h3>Room Statistics</h3>
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 text-center">
+                            <h4>{{ total_reviews }}</h4>
+                            <p>Total Reviews</p>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <h4>{{ like_count }}</h4>
+                            <p>Liked Reviews</p>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <h4>{{ like_percentage|floatformat:0 }}%</h4>
+                            <p>Like Percentage</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <h3 class="mb-3">Reviews</h3>
+        
+        {% for review in reviews %}
+            <article class="media content-section">
+                <img class="rounded-circle article-img" src="{{ review.author.profile.image.url }}">
+                <div class="media-body">
+                    <div class="article-metadata">
+                        <a class="mr-2" href="{% url 'user-posts' review.author.username %}">{{ review.author }}</a>
+                        <small class="text-muted">{{ review.date_posted|date:"F d, Y" }}</small>
+                        
+                        {% if review.liked %}
+                            <span class="badge badge-success ml-2" style="padding: 5px 10px; font-size: 14px;">Liked this room</span>
+                        {% endif %}
+                        
+                        {% if review.author == user %}
+                            <div>
+                                <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{% url 'post-update' review.id %}">Update</a>
+                                <a class="btn btn-danger btn-sm mt-1 mb-1" href="{% url 'post-delete' review.id %}">Delete</a>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <h4 class="article-title">{{ review.title }}</h4>
+                    <p class="article-content">{{ review.content }}</p>
+
+                    {% if review.images.all %}
+                        <div class="post-image-gallery">
+                            {% if review.images.count == 1 %}
+                                <img src="{{ review.images.first.image.url }}" class="single-post-image" alt="Review Image">
+                            {% else %}
+                                <div class="post-image-grid">
+                                    {% for image in review.images.all|slice:":4" %}
+                                        <div class="post-image-container">
+                                            <img src="{{ image.image.url }}" class="post-gallery-image" alt="Review Image">
+                                            {% if forloop.counter == 4 and review.images.count > 4 %}
+                                                <div class="image-overlay">
+                                                    <span>+{{ review.images.count|add:"-4" }}</span>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </article>
+        {% empty %}
+            <div class="alert alert-info">
+                No reviews have been posted for this room yet. 
+                <a href="{% url 'room-review-create' object.id %}">Be the first to review!</a>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock content %}

@@ -1,0 +1,29 @@
+{% extends 'review/base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+    <div class="content-section">
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">
+                    {% if object %}
+                        Update Room
+                    {% else %}
+                        Add New Room
+                    {% endif %}
+                </legend>
+                {{ form|crispy }}
+            </fieldset>
+            <div class="form-group">
+                <button class="btn btn-outline-info" type="submit">Save</button>
+                {% if object %}
+                    <a class="btn btn-outline-secondary" href="{% url 'room-detail' object.id %}">Cancel</a>
+                {% elif form.initial.dorm %}
+                    <a class="btn btn-outline-secondary" href="{% url 'dorm-detail' form.initial.dorm.id %}">Cancel</a>
+                {% else %}
+                    <a class="btn btn-outline-secondary" href="{% url 'dorm-list' %}">Cancel</a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+{% endblock content %}
