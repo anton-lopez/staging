@@ -11,6 +11,15 @@ from .models import Post, PostImage, Dorm, Room
 from .forms import PostForm, PostImageForm, DormForm, RoomForm
 
 
+def home(request):
+    """View function for the blank home page"""
+    return render(request, 'review/home.html', {'title': 'Home'})
+
+
+def about(request):
+    return render(request, 'review/about.html', {'title': 'About'})
+
+
 class DormListView(ListView):
     model = Dorm
     template_name = 'review/dorm_list.html'
@@ -157,7 +166,7 @@ class RoomDeleteView(LoginRequiredMixin, DeleteView):
 
 class PostListView(ListView):
     model = Post
-    template_name = 'review/home.html'
+    template_name = 'review/review_list.html'
     context_object_name = 'reviews'
     ordering = ['-date_posted']
     paginate_by = 5
@@ -296,7 +305,7 @@ class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, View):
 
 class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Post
-    success_url = '/review/'
+    success_url = '/reviews/'
 
     def test_func(self):
         post = self.get_object()
@@ -319,15 +328,3 @@ class PostImageDeleteView(LoginRequiredMixin, UserPassesTestMixin, View):
     def test_func(self):
         image = get_object_or_404(PostImage, pk=self.kwargs.get('pk'))
         return self.request.user == image.post.author
-
-
-def home(request):
-    context = {
-        'reviews': Post.objects.all(),
-        'dorms': Dorm.objects.all(),
-    }
-    return render(request, 'review/home.html', context)
-
-
-def about(request):
-    return render(request, 'review/about.html', {'title': 'About'})

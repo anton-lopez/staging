@@ -10,7 +10,7 @@ from .views import (
 )
 
 urlpatterns = [
-    path('', DormListView.as_view(), name='review-home'),
+    path('', views.home, name='review-home'),  # Root path now points to the blank home page
     path('about/', views.about, name='review-about'),
 
     # Dorm URLs
