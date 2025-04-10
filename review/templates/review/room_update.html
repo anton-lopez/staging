@@ -56,7 +56,7 @@
             </fieldset>
             <div class="form-group">
                 <button class="btn btn-outline-info" type="submit">Save</button>
-                <a class="btn btn-outline-secondary" href="{% url 'room-detail' room.id %}">Cancel</a>
+                <a class="btn btn-outline-secondary" href="{% url 'room-detail' room.dorm.slug room.slug %}">Cancel</a>
             </div>
         </form>
 

@@ -41,7 +41,7 @@ class Room(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.room_number)
+            self.slug = f"room-{self.room_number}"
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):
