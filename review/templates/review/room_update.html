@@ -6,11 +6,7 @@
             {% csrf_token %}
             <fieldset class="form-group">
                 <legend class="border-bottom mb-4">
-                    {% if object %}
-                        Update Room
-                    {% else %}
-                        Add New Room
-                    {% endif %}
+                    Update Room
                 </legend>
 
                 <!-- Form fields grouped for clarity -->
@@ -34,6 +30,14 @@
                                     <label for="{{ form.image.id_for_label }}"><strong>Cover Image</strong></label>
                                     {{ form.image }}
                                     <small class="form-text text-muted">{{ form.image.help_text }}</small>
+
+                                    {% if room.image %}
+                                        <div class="mt-2">
+                                            <p><strong>Current Cover Image:</strong></p>
+                                            <img src="{{ room.image.url }}" class="img-thumbnail"
+                                                 style="max-height: 150px;">
+                                        </div>
+                                    {% endif %}
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -52,14 +56,30 @@
             </fieldset>
             <div class="form-group">
                 <button class="btn btn-outline-info" type="submit">Save</button>
-                {% if object %}
-                    <a class="btn btn-outline-secondary" href="{% url 'room-detail' object.id %}">Cancel</a>
-                {% elif form.initial.dorm %}
-                    <a class="btn btn-outline-secondary" href="{% url 'dorm-detail' form.initial.dorm.id %}">Cancel</a>
-                {% else %}
-                    <a class="btn btn-outline-secondary" href="{% url 'dorm-list' %}">Cancel</a>
-                {% endif %}
+                <a class="btn btn-outline-secondary" href="{% url 'room-detail' room.id %}">Cancel</a>
             </div>
         </form>
+
+        {% if room.images.all %}
+            <div class="mt-4">
+                <h4 class="border-bottom pb-2">Current Gallery Images</h4>
+                <div class="row">
+                    {% for img in room.images.all %}
+                        <div class="col-md-4 mb-3">
+                            <div class="card">
+                                <img src="{{ img.image.url }}" class="card-img-top" alt="Room Image"
+                                     style="height: 150px; object-fit: cover;">
+                                <div class="card-body">
+                                    <form method="POST" action="{% url 'room-image-delete' img.id %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
     </div>
 {% endblock content %}

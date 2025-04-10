@@ -7,8 +7,8 @@ from django.views import View
 from django.urls import reverse_lazy, reverse
 from django.contrib.admin.views.decorators import staff_member_required
 from django.utils.decorators import method_decorator
-from .models import Post, PostImage, Dorm, Room
-from .forms import PostForm, PostImageForm, DormForm, RoomForm
+from .models import Post, PostImage, Dorm, Room, RoomImage
+from .forms import PostForm, PostImageForm, DormForm, RoomForm, RoomImageForm
 
 
 def home(request):
@@ -130,29 +130,119 @@ class RoomDetailView(DetailView):
 
 
 @method_decorator(staff_member_required, name='dispatch')
-class RoomCreateView(LoginRequiredMixin, CreateView):
-    model = Room
-    form_class = RoomForm
-    template_name = 'review/room_form.html'
+class RoomCreateView(LoginRequiredMixin, View):
+    def get(self, request, dorm_id=None):
+        initial = {}
+        if dorm_id:
+            initial['dorm'] = get_object_or_404(Dorm, pk=dorm_id)
 
-    def get_success_url(self):
-        return reverse('dorm-detail', kwargs={'pk': self.object.dorm.pk})
+        form = RoomForm(initial=initial)
+        image_form = RoomImageForm()
 
-    def get_initial(self):
-        initial = super().get_initial()
-        if 'dorm_id' in self.kwargs:
-            initial['dorm'] = get_object_or_404(Dorm, pk=self.kwargs['dorm_id'])
-        return initial
+        return render(request, 'review/room_form.html', {
+            'form': form,
+            'image_form': image_form
+        })
+
+    def post(self, request, dorm_id=None):
+        initial = {}
+        if dorm_id:
+            initial['dorm'] = get_object_or_404(Dorm, pk=dorm_id)
+
+        form = RoomForm(request.POST, request.FILES, initial=initial)
+        image_form = RoomImageForm(request.POST, request.FILES)
+
+        # Check for duplicate room before full validation
+        if 'dorm' in form.data and 'room_number' in form.data:
+            try:
+                dorm_id = int(form.data['dorm'])
+                room_number = form.data['room_number']
+
+                # Check if this room already exists in this dorm
+                if Room.objects.filter(dorm_id=dorm_id, room_number=room_number).exists():
+                    dorm = Dorm.objects.get(id=dorm_id)
+                    messages.error(request,
+                                   f'Room {room_number} already exists in {dorm.name}. Please use a different room number.')
+                    return render(request, 'review/room_form.html', {
+                        'form': form,
+                        'image_form': image_form
+                    })
+            except (ValueError, Dorm.DoesNotExist):
+                # Will be caught by form validation
+                pass
+
+        if form.is_valid():
+            room = form.save()
+
+            # Handle additional images using the specific field name
+            if 'additional_images' in request.FILES:
+                additional_images = request.FILES.getlist('additional_images')
+                for img in additional_images:
+                    RoomImage.objects.create(room=room, image=img)
+
+            messages.success(request, 'Room created successfully!')
+            return redirect('room-detail', pk=room.pk)
+
+        return render(request, 'review/room_form.html', {
+            'form': form,
+            'image_form': image_form
+        })
 
 
 @method_decorator(staff_member_required, name='dispatch')
-class RoomUpdateView(LoginRequiredMixin, UpdateView):
-    model = Room
-    form_class = RoomForm
-    template_name = 'review/room_form.html'
+class RoomUpdateView(LoginRequiredMixin, View):
+    def get(self, request, pk):
+        room = get_object_or_404(Room, pk=pk)
+        form = RoomForm(instance=room)
+        image_form = RoomImageForm()
 
-    def get_success_url(self):
-        return reverse('room-detail', kwargs={'pk': self.object.pk})
+        return render(request, 'review/room_update.html', {
+            'form': form,
+            'image_form': image_form,
+            'room': room
+        })
+
+    def post(self, request, pk):
+        room = get_object_or_404(Room, pk=pk)
+        form = RoomForm(request.POST, request.FILES, instance=room)
+        image_form = RoomImageForm(request.POST, request.FILES)
+
+        # Check for duplicate room before full validation
+        if 'dorm' in form.data and 'room_number' in form.data:
+            try:
+                dorm_id = int(form.data['dorm'])
+                room_number = form.data['room_number']
+
+                # Check if this room already exists in this dorm
+                if Room.objects.filter(dorm_id=dorm_id, room_number=room_number).exists():
+                    dorm = Dorm.objects.get(id=dorm_id)
+                    messages.warning(request,
+                                     f'Room {room_number} already exists in {dorm.name}. Please use a different room number.')
+                    return render(request, 'review/room_form.html', {
+                        'form': form,
+                        'image_form': image_form
+                    })
+            except (ValueError, Dorm.DoesNotExist):
+                # Will be caught by form validation
+                pass
+
+        if form.is_valid():
+            updated_room = form.save()
+
+            # Handle additional images using the specific field name
+            if 'additional_images' in request.FILES:
+                additional_images = request.FILES.getlist('additional_images')
+                for img in additional_images:
+                    RoomImage.objects.create(room=updated_room, image=img)
+
+            messages.success(request, 'Room updated successfully!')
+            return redirect('room-detail', pk=updated_room.pk)
+
+        return render(request, 'review/room_update.html', {
+            'form': form,
+            'image_form': image_form,
+            'room': room
+        })
 
 
 @method_decorator(staff_member_required, name='dispatch')
@@ -328,3 +418,15 @@ class PostImageDeleteView(LoginRequiredMixin, UserPassesTestMixin, View):
     def test_func(self):
         image = get_object_or_404(PostImage, pk=self.kwargs.get('pk'))
         return self.request.user == image.post.author
+
+
+@method_decorator(staff_member_required, name='dispatch')
+class RoomImageDeleteView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        image = get_object_or_404(RoomImage, pk=pk)
+        room = image.room
+
+        image.delete()
+        messages.success(request, 'Image deleted successfully!')
+
+        return redirect('room-update', pk=room.pk)

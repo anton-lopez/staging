@@ -1,5 +1,5 @@
 from django import forms
-from .models import Post, PostImage, Dorm, Room
+from .models import Post, PostImage, Dorm, Room, RoomImage
 
 
 class MultipleFileInput(forms.ClearableFileInput):
@@ -30,7 +30,12 @@ class RoomForm(forms.ModelForm):
     class Meta:
         model = Room
         fields = ['dorm', 'room_number', 'floor', 'description', 'image']
-
+        labels = {
+            'image': 'Cover Image'
+        }
+        help_texts = {
+            'image': 'This image will be displayed as the main room image in listings.'
+        }
 
 class PostForm(forms.ModelForm):
     class Meta:
@@ -63,3 +68,16 @@ class PostImageForm(forms.ModelForm):
     class Meta:
         model = PostImage
         fields = ['image']
+
+
+class RoomImageForm(forms.ModelForm):
+    additional_images = MultipleFileField(label='Additional Images', required=False)
+
+    class Meta:
+        model = RoomImage
+        fields = []  # We don't use any model fields directly
+
+    def __init__(self, *args, **kwargs):
+        super(RoomImageForm, self).__init__(*args, **kwargs)
+        self.fields[
+            'additional_images'].help_text = 'Optional: Select multiple images for the room gallery (Ctrl+click or Cmd+click to select multiple)'

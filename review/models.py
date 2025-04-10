@@ -35,6 +35,24 @@ class Room(models.Model):
         return reverse('room-detail', kwargs={'pk': self.pk})
 
 
+class RoomImage(models.Model):
+    room = models.ForeignKey(Room, related_name='images', on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='room_gallery')
+    caption = models.CharField(max_length=100, blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.room.dorm.name} - Room {self.room.room_number} - Image"
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        # Create a thumbnail
+        if self.image:
+            img = Image.open(self.image.path)
+            img.thumbnail((800, 600), Image.LANCZOS)
+            img.save(self.image.path, quality=85, optimize=True)
+
+
 class Post(models.Model):
     title = models.CharField(max_length=100)
     content = models.TextField()

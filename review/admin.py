@@ -1,5 +1,10 @@
 from django.contrib import admin
-from .models import Post, PostImage, Dorm, Room
+from .models import Post, PostImage, Dorm, Room, RoomImage
+
+
+class RoomImageInline(admin.TabularInline):
+    model = RoomImage
+    extra = 1
 
 
 class PostImageInline(admin.TabularInline):
@@ -31,6 +36,7 @@ class DormAdmin(admin.ModelAdmin):
 
 
 class RoomAdmin(admin.ModelAdmin):
+    inlines = [RoomImageInline]
     list_display = ('room_number', 'dorm', 'floor', 'get_reviews_count')
     list_filter = ('dorm', 'floor')
     search_fields = ('room_number', 'description', 'dorm__name')

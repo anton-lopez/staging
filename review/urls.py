@@ -6,7 +6,7 @@ from .views import (
     PostImageDeleteView, DormListView, DormDetailView,
     DormCreateView, DormUpdateView, DormDeleteView,
     RoomListView, RoomDetailView, RoomCreateView,
-    RoomUpdateView, RoomDeleteView
+    RoomUpdateView, RoomDeleteView, RoomImageDeleteView
 )
 
 urlpatterns = [
@@ -27,6 +27,7 @@ urlpatterns = [
     path('dorm/<int:dorm_id>/room/new/', RoomCreateView.as_view(), name='dorm-room-create'),
     path('room/<int:pk>/update/', RoomUpdateView.as_view(), name='room-update'),
     path('room/<int:pk>/delete/', RoomDeleteView.as_view(), name='room-delete'),
+    path('room/image/<int:pk>/delete/', RoomImageDeleteView.as_view(), name='room-image-delete'),
 
     # Review URLs
     path('reviews/', PostListView.as_view(), name='review-list'),
