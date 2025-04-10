@@ -161,8 +161,7 @@ class RoomCreateView(LoginRequiredMixin, View):
                 # Check if this room already exists in this dorm
                 if Room.objects.filter(dorm_id=dorm_id, room_number=room_number).exists():
                     dorm = Dorm.objects.get(id=dorm_id)
-                    messages.error(request,
-                                   f'Room {room_number} already exists in {dorm.name}. Please use a different room number.')
+                    form.add_error('room_number', f'Room {room_number} already exists in {dorm.name}. Please use a different room number.')
                     return render(request, 'review/room_form.html', {
                         'form': form,
                         'image_form': image_form
@@ -213,14 +212,14 @@ class RoomUpdateView(LoginRequiredMixin, View):
                 dorm_id = int(form.data['dorm'])
                 room_number = form.data['room_number']
 
-                # Check if this room already exists in this dorm
-                if Room.objects.filter(dorm_id=dorm_id, room_number=room_number).exists():
+                # Check if this room already exists in this dorm (excluding the current room)
+                if Room.objects.filter(dorm_id=dorm_id, room_number=room_number).exclude(pk=pk).exists():
                     dorm = Dorm.objects.get(id=dorm_id)
-                    messages.warning(request,
-                                     f'Room {room_number} already exists in {dorm.name}. Please use a different room number.')
-                    return render(request, 'review/room_form.html', {
+                    form.add_error('room_number', f'Room {room_number} already exists in {dorm.name}. Please use a different room number.')
+                    return render(request, 'review/room_update.html', {
                         'form': form,
-                        'image_form': image_form
+                        'image_form': image_form,
+                        'room': room
                     })
             except (ValueError, Dorm.DoesNotExist):
                 # Will be caught by form validation
