@@ -3,7 +3,8 @@
     <div class="content-section">
         <div class="media">
             {% if object.image %}
-                <img class="rounded mr-3" src="{{ object.image.url }}" alt="{{ object.name }}" style="width: 200px; height: 200px; object-fit: cover;">
+                <img class="rounded mr-3" src="{{ object.image.url }}" alt="{{ object.name }}"
+                     style="width: 200px; height: 200px; object-fit: cover;">
             {% endif %}
             <div class="media-body">
                 <h1 class="mt-0">{{ object.name }}</h1>
@@ -29,9 +30,11 @@
                 <div class="col-md-4 mb-4">
                     <div class="card h-100">
                         {% if room_data.room.image %}
-                            <img src="{{ room_data.room.image.url }}" class="card-img-top" alt="Room {{ room_data.room.room_number }}" style="height: 150px; object-fit: cover;">
+                            <img src="{{ room_data.room.image.url }}" class="card-img-top"
+                                 alt="Room {{ room_data.room.room_number }}" style="height: 150px; object-fit: cover;">
                         {% else %}
-                            <div class="card-img-top bg-light d-flex justify-content-center align-items-center" style="height: 150px;">
+                            <div class="card-img-top bg-light d-flex justify-content-center align-items-center"
+                                 style="height: 150px;">
                                 <span class="text-muted">No Image</span>
                             </div>
                         {% endif %}
@@ -51,10 +54,13 @@
                                 <p class="card-text"><small class="text-muted">No reviews yet</small></p>
                             {% endif %}
 
-                            <a href="{% url 'room-detail' room_data.room.id %}" class="btn btn-outline-info">View Details</a>
+                            <a href="{% url 'room-detail' room_data.room.dorm.slug room_data.room.slug %}"
+                               class="btn btn-outline-info">View Details</a>
                             {% if user.is_staff %}
-                                <a href="{% url 'room-update' room_data.room.id %}" class="btn btn-outline-secondary btn-sm">Edit</a>
-                                <a href="{% url 'room-delete' room_data.room.id %}" class="btn btn-outline-danger btn-sm">Delete</a>
+                                <a href="{% url 'room-update' room_data.room.dorm.slug room_data.room.slug %}"
+                                   class="btn btn-outline-secondary btn-sm">Edit</a>
+                                <a href="{% url 'room-delete' room_data.room.dorm.slug room_data.room.slug %}"
+                                   class="btn btn-outline-danger btn-sm">Delete</a>
                             {% endif %}
                         </div>
                     </div>

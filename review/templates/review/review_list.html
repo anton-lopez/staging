@@ -15,7 +15,9 @@
                 </div>
                 <h2><a class="article-title" href="{% url 'post-detail' review.id %}">{{ review.title }}</a></h2>
                 {% if review.room %}
-                    <p class="text-muted mb-2">Review for <a href="{% url 'room-detail' review.room.id %}">{{ review.room.dorm.name }} - Room {{ review.room.room_number }}</a></p>
+                    <p class="text-muted mb-2">Review for <a
+                            href="{% url 'room-detail' review.room.dorm.slug review.room.slug %}">{{ review.room.dorm.name }}
+                        - Room {{ review.room.room_number }}</a></p>
                 {% endif %}
                 <p class="article-content">{{ review.content }}</p>
 
@@ -23,14 +25,16 @@
                     <div class="post-image-gallery">
                         {% if review.images.count == 1 %}
                             <a href="{% url 'post-detail' review.id %}">
-                                <img src="{{ review.images.first.image.url }}" class="single-post-image" alt="Post Image">
+                                <img src="{{ review.images.first.image.url }}" class="single-post-image"
+                                     alt="Post Image">
                             </a>
                         {% else %}
                             <div class="post-image-grid">
                                 {% for image in review.images.all|slice:":4" %}
                                     <div class="post-image-container">
                                         <a href="{% url 'post-detail' review.id %}">
-                                            <img src="{{ image.image.url }}" class="post-gallery-image" alt="Post Image">
+                                            <img src="{{ image.image.url }}" class="post-gallery-image"
+                                                 alt="Post Image">
                                             {% if forloop.counter == 4 and review.images.count > 4 %}
                                                 <div class="image-overlay">
                                                     <span>+{{ review.images.count|add:"-4" }}</span>

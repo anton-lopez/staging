@@ -4,35 +4,48 @@ from django.contrib.auth.models import User
 from django.urls import reverse
 from PIL import Image
 import os
+from django.utils.text import slugify
 
 
 class Dorm(models.Model):
     name = models.CharField(max_length=100)
+    slug = models.SlugField(max_length=100, unique=True, blank=True)
     description = models.TextField()
     image = models.ImageField(upload_to='dorm_images', blank=True, null=True)
 
     def __str__(self):
         return self.name
 
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+
     def get_absolute_url(self):
-        return reverse('dorm-detail', kwargs={'pk': self.pk})
+        return reverse('dorm-detail', kwargs={'slug': self.slug})
 
 
 class Room(models.Model):
     dorm = models.ForeignKey(Dorm, on_delete=models.CASCADE, related_name='rooms')
     room_number = models.CharField(max_length=20)
+    slug = models.SlugField(max_length=100, blank=True)
     floor = models.PositiveIntegerField()
     description = models.TextField()
     image = models.ImageField(upload_to='room_images', blank=True, null=True)
 
     class Meta:
-        unique_together = ['dorm', 'room_number']  # Ensure room numbers are unique within a dorm
+        unique_together = ['dorm', 'room_number', 'slug']  # Ensure room numbers are unique within a dorm
 
     def __str__(self):
         return f"{self.dorm.name} - Room {self.room_number}"
 
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.room_number)
+        super().save(*args, **kwargs)
+
     def get_absolute_url(self):
-        return reverse('room-detail', kwargs={'pk': self.pk})
+        return reverse('room-detail', kwargs={'dorm_slug': self.dorm.slug, 'room_slug': self.slug})
 
 
 class RoomImage(models.Model):

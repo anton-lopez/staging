@@ -8,15 +8,17 @@
                 <legend class="border-bottom mb-4">Room Review</legend>
                 {{ post_form|crispy }}
                 {{ image_form|crispy }}
-                <small class="text-muted">You can select multiple images at once by holding Ctrl (or Command on Mac) while clicking.</small>
+                <small class="text-muted">You can select multiple images at once by holding Ctrl (or Command on Mac)
+                    while clicking.</small>
             </fieldset>
             <div class="form-group">
-               <button class="btn btn-outline-info" type="submit">Post Review</button>
-               {% if post_form.instance.room %}
-                   <a class="btn btn-outline-secondary" href="{% url 'room-detail' post_form.instance.room.id %}">Cancel</a>
-               {% else %}
-                   <a class="btn btn-outline-secondary" href="{% url 'review-home' %}">Cancel</a>
-               {% endif %}
+                <button class="btn btn-outline-info" type="submit">Post Review</button>
+                {% if post_form.instance.room %}
+                    <a class="btn btn-outline-secondary"
+                       href="{% url 'room-detail' post_form.instance.room.dorm.slug post_form.instance.room.slug %}">Cancel</a>
+                {% else %}
+                    <a class="btn btn-outline-secondary" href="{% url 'review-home' %}">Cancel</a>
+                {% endif %}
             </div>
         </form>
     </div>
