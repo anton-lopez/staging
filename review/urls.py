@@ -19,6 +19,7 @@ urlpatterns = [
     path('dorm/<slug:slug>/', DormDetailView.as_view(), name='dorm-detail'),
     path('dorm/<slug:slug>/update/', DormUpdateView.as_view(), name='dorm-update'),
     path('dorm/<slug:slug>/delete/', DormDeleteView.as_view(), name='dorm-delete'),
+    path('dorm/<slug:dorm_slug>/room/new/', RoomCreateView.as_view(), name='dorm-room-create'),
 
     # Room URLs - legacy numeric ID routes (keep for backwards compatibility)
     path('rooms/', RoomListView.as_view(), name='room-list'),

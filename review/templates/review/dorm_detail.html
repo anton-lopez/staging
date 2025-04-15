@@ -13,9 +13,9 @@
 
                 {% if user.is_staff %}
                     <div class="mt-3 mb-4">
-                        <a href="{% url 'dorm-update' object.id %}" class="btn btn-outline-secondary">Edit Dorm</a>
-                        <a href="{% url 'dorm-delete' object.id %}" class="btn btn-outline-danger">Delete Dorm</a>
-                        <a href="{% url 'dorm-room-create' object.id %}" class="btn btn-outline-primary">Add Room</a>
+                        <a href="{% url 'dorm-update' object.slug %}" class="btn btn-outline-secondary">Edit Dorm</a>
+                        <a href="{% url 'dorm-delete' object.slug %}" class="btn btn-outline-danger">Delete Dorm</a>
+                        <a href="{% url 'dorm-room-create' object.slug %}" class="btn btn-outline-primary">Add Room</a>
                     </div>
                 {% endif %}
             </div>
