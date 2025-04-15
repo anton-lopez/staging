@@ -131,7 +131,7 @@
                             </div>
                         {% endif %}
                     </div>
-                    <h4 class="article-title">{{ review.title }}</h4>
+                    <h4><a class="article-title" href="{% url 'post-detail' review.id %}">{{ review.title }}</a></h4>
                     <p class="article-content">{{ review.content }}</p>
 
                     {% if review.images.all %}
