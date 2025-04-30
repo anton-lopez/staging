@@ -63,12 +63,6 @@
     display: block;
   }
 
-
-
-#float_bubble{
-  z-index: 99;
-}
-
   
   #little_dynamic_bubble {
     height: fit-content;

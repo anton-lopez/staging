@@ -1,49 +1,48 @@
+<!-- filepath: /Users/paedarrader/DormView-CompletelyMerged/staging-main/review/templates/review/dorm_detail.html -->
 {% extends 'review/base.html' %}
 {% block content %}
     <div class="content-section">
         <div class="media">
             {% if object.image %}
-            <div class = "container" style = "position: absolute; z-index: 2;">
-                <h1 class="mt-0 px-3 py-3" style = "position: relative; color: white;">{{ object.name }}</h1>
+            <div class="container" style="position: absolute; z-index: 2;">
+                <h1 class="mt-0 px-3 py-3" style="position: relative; color: white;">{{ object.name }}</h1>
             </div>
             <div style="position: relative; width: 100%; height: 60vh; overflow: hidden;">
                 <img class="rounded mr-3" src="{{ object.image.url }}" alt="{{ object.name }}"
-                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; filter: blur(3px); filter:brightness(50%);">
+                     style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; filter: blur(3px); filter:brightness(50%);">
             </div>
             {% endif %}
-            <div class="media-body" style = "z-index: 2; position: relative;">
-                {% if object.image %}
-                <p class="text-left text-white p-2 rounded bg-dark bg-opacity-50" style="position: absolute; bottom: 80%; width: 100%; z-index: 3;" id = "desc_VW">
-                    <small>{{ object.description }}</small>
-                </p>
-                {% else %}
-                <p class="text-left">
-                    {{ object.description }}
-                </p>
-                {% endif %}
-                <div class="d-flex gap-2 justify-content-start py-1 flex-wrap">
-                    {% if labels_list %}
-                        {% for label in labels_list %}
-                            <span class="badge bg-primary-subtle border border-primary-subtle text-primary-emphasis rounded-pill mt-3" style="font-size: 1rem; padding: 0.5rem 1rem;">
-                                {{ label }}
-                            </span>
-                        {% endfor %}
-                    {% else %}
-                        <span class="badge bg-secondary-subtle border border-secondary-subtle text-secondary-emphasis rounded-pill mt-3">
-                            No Labels
-                        </span>
-                    {% endif %}
-                </div>
-                <p class="text-muted">{{ object.rooms.count }} room{{ object.rooms.count|pluralize }}</p>
+        </div>
 
-                {% if user.is_staff %}
-                    <div class="mt-3 mb-4">
-                        <a href="{% url 'dorm-update' object.slug %}" class="btn btn-outline-secondary">Edit Dorm</a>
-                        <a href="{% url 'dorm-delete' object.slug %}" class="btn btn-outline-danger">Delete Dorm</a>
-                        <a href="{% url 'dorm-room-create' object.slug %}" class="btn btn-outline-primary">Add Room</a>
-                    </div>
+        <div class="media-body mt-4">
+            {% if object.image %}
+                <p>{{ object.description }}</p>
+            {% else %}
+                <h1 class="mt-0 py-3" style="position: relative;">{{ object.name }}</h1>
+                <p>{{ object.description }}</p>
+            {% endif %}
+            <div class="d-flex gap-2 justify-content-start py-1 flex-wrap">
+                {% if labels_list %}
+                    {% for label in labels_list %}
+                        <span class="badge bg-primary-subtle border border-primary-subtle text-primary-emphasis rounded-pill mt-3" style="font-size: 1rem; padding: 0.5rem 1rem;">
+                            {{ label }}
+                        </span>
+                    {% endfor %}
+                {% else %}
+                    <span class="badge bg-secondary-subtle border border-secondary-subtle text-secondary-emphasis rounded-pill mt-3">
+                        No Labels
+                    </span>
                 {% endif %}
             </div>
+            <p class="text-muted">{{ object.rooms.count }} room{{ object.rooms.count|pluralize }}</p>
+
+            {% if user.is_staff %}
+                <div class="mt-3 mb-4">
+                    <a href="{% url 'dorm-update' object.slug %}" class="btn btn-outline-secondary">Edit Dorm</a>
+                    <a href="{% url 'dorm-delete' object.slug %}" class="btn btn-outline-danger">Delete Dorm</a>
+                    <a href="{% url 'dorm-room-create' object.slug %}" class="btn btn-outline-primary">Add Room</a>
+                </div>
+            {% endif %}
         </div>
 
         <hr>
