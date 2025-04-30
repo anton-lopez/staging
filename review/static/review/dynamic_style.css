@@ -1,0 +1,124 @@
+@property --gradient-angle {
+    syntax: "<angle>";
+    initial-value: 0deg;
+    inherits: false;
+  }
+  
+  :root {
+    --clr-1: #02003b;
+    --clr-2: #070057;
+    --clr-3: #1521a3;
+    --clr-4: #255fd4;
+    --clr-5: #2c99ed;
+  }
+  
+  
+  #colored-outline-moving {
+    height: fit-content;
+    border-radius: 3px;
+    position: relative;
+  }
+  
+  #colored-outline-moving::before,
+  #colored-outline-moving::after {
+    content: "";
+    position: absolute;
+    inset: -0.5rem;
+    z-index: -1;
+    background: conic-gradient(
+      from var(--gradient-angle),
+      var(--clr-3),
+      var(--clr-4),
+      var(--clr-5),
+      var(--clr-4),
+      var(--clr-3)
+    );
+    border-radius: inherit;
+    animation: rotation 10s linear infinite;
+  }
+  
+  #colored-outline-moving::after {
+    filter: blur(3.5rem);
+  }
+  
+  @keyframes rotation {
+    0% {
+      --gradient-angle: 0deg;
+    }
+    100% {
+      --gradient-angle: 360deg;
+    }
+  }
+
+  #header_home_font{
+    font-family: extrabold_mona_font;
+  }
+  
+
+  #gif_image{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 0px 0px 3px 3px;
+    display: block;
+  }
+
+
+
+#float_bubble{
+  z-index: 99;
+}
+
+  
+  #little_dynamic_bubble {
+    height: fit-content;
+    border-radius: 5px;
+    position: relative;
+    z-index: 0; /* Ensure the bubble is behind the content */
+}
+
+#little_dynamic_bubble::before,
+#little_dynamic_bubble::after {
+    content: "";
+    position: absolute;
+    inset: -0.2rem;
+    z-index: -1; /* Place the outline behind the bubble */
+    background: conic-gradient(
+        from var(--gradient-angle),
+        var(--clr-3),
+        var(--clr-4),
+        var(--clr-5),
+        var(--clr-4),
+        var(--clr-3)
+    );
+    border-radius: inherit;
+    animation: rotation 10s linear infinite;
+}
+
+
+
+  
+#little_dynamic_bubble_SMALLER {
+  height: fit-content;
+  border-radius: 5px;
+  position: relative;
+  z-index: 0; /* Ensure the bubble is behind the content */
+}
+
+#little_dynamic_bubble_SMALLER::before,
+#little_dynamic_bubble_SMALLER::after {
+  content: "";
+  position: absolute;
+  inset: -0.7rem;
+  z-index: -1; /* Place the outline behind the bubble */
+  background: conic-gradient(
+      from var(--gradient-angle),
+      var(--clr-3),
+      var(--clr-4),
+      var(--clr-5),
+      var(--clr-4),
+      var(--clr-3)
+  );
+  border-radius: inherit;
+  animation: rotation 10s linear infinite;
+}

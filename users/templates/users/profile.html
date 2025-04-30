@@ -1,0 +1,103 @@
+{% extends "review/base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+    <div class="content-section">
+        <div class="media">
+            <img class="rounded-circle account-img" src="{{ user.profile.image.url }}">
+            <div class="media-body">
+                <h2 class="account-heading">{{ user.username }}</h2>
+                <p class="text-secondary">{{ user.email }}</p>
+                {% if user.profile.assigned_room %}
+                    <p class="text-primary">
+                        <strong>Assigned Room:</strong> {{ user.profile.assigned_room.dorm.name }} -
+                        Room {{ user.profile.assigned_room.room_number }}
+                    </p>
+                {% else %}
+                    <p class="text-warning">
+                        <strong>No room assigned.</strong> You must select your room to submit reviews.
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">Profile Info</legend>
+                {{ u_form|crispy }}
+                {{ p_form|crispy }}
+            </fieldset>
+            <div class="form-group">
+                <button class="btn btn-outline-info" type="submit">Update</button>
+            </div>
+        </form>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const dormSelect = document.querySelector('select[name="dorm"]');
+                const roomSelect = document.querySelector('select[name="assigned_room"]');
+
+                // Function to update room options based on selected dorm
+                function updateRooms() {
+                    const dormId = dormSelect.value;
+                    const currentRoomValue = roomSelect.value; // Store current selection
+
+                    // If no dorm is selected, disable room selection
+                    if (!dormId) {
+                        // Clear current options but keep an empty option
+                        roomSelect.innerHTML = '<option value="">Select a room</option>';
+                        roomSelect.disabled = true;
+                        return;
+                    }
+
+                    // Enable room selection
+                    roomSelect.disabled = false;
+
+                    // Fetch rooms for the selected dorm
+                    fetch(`/get-rooms/?dorm_id=${dormId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            // Keep track of the first option to select it by default
+                            let firstOptionId = null;
+
+                            // Clear current options
+                            roomSelect.innerHTML = '<option value="">Select a room</option>';
+
+                            // Add rooms to select element
+                            data.rooms.forEach(room => {
+                                const option = document.createElement('option');
+                                option.value = room.id;
+                                option.textContent = `Room ${room.room_number} (Floor ${room.floor})`;
+
+                                // If this is the first option, store its ID
+                                if (firstOptionId === null) {
+                                    firstOptionId = room.id;
+                                }
+
+                                // If this matches the previously selected room, mark it selected
+                                if (room.id.toString() === currentRoomValue) {
+                                    option.selected = true;
+                                }
+
+                                roomSelect.appendChild(option);
+                            });
+
+                            // If there's no current value but we have options, select the first one
+                            if (!roomSelect.value && firstOptionId !== null) {
+                                roomSelect.value = firstOptionId;
+                            }
+                        })
+                        .catch(error => console.error('Error fetching rooms:', error));
+                }
+
+                // Initialize rooms on page load
+                if (dormSelect.value) {
+                    updateRooms();
+                } else {
+                    roomSelect.disabled = true;
+                }
+
+                // Listen for dorm selection changes
+                dormSelect.addEventListener('change', updateRooms);
+            });
+        </script>
+    </div>
+{% endblock content %}

@@ -1,0 +1,41 @@
+<!-- filepath: /Users/paedarrader/DormView-CompletelyMerged/staging-main/review/templates/review/about.html -->
+{% extends 'review/base.html' %}
+{% block content %}
+{% load static %}
+<div class="container bg-white">
+    <br>
+    <h1 class = "text-center text-primary">Meet the Programmers</h1>
+    <div class="row justify-content-center py-5">
+        <!-- First Column -->
+        <div class="col-md-5 text-center p-4" style="position: relative; border-radius: 10px; overflow: hidden;">
+            <div style="position: absolute; inset: 0; z-index: -1; background: conic-gradient(from 0deg, #2563EB, #4F46E5, #2563EB); animation: rotate 5s linear infinite;"></div>
+            <div class="d-flex align-items-center justify-content-center mb-3">
+                <img src="{% static '../static/images/static_images/no_image.jpg' %}" alt="Image 1" class="rounded-circle" style="width: 50px; height: 50px; margin-right: 10px;">
+                <h3 class="text-dark">Anton Lopez</h3>
+            </div>
+            <p class="text-dark">This is a description for the first column.</p>
+        </div>
+
+        <!-- Second Column -->
+        <div class="col-md-5 text-center p-4 ml-md-4 mt-4 mt-md-0" style="position: relative; border-radius: 10px; overflow: hidden;">
+            <div style="position: absolute; inset: 0; z-index: -1; background: conic-gradient(from 0deg, #2563EB, #4F46E5, #2563EB); animation: rotate 5s linear infinite;"></div>
+            <div class="d-flex align-items-center justify-content-center mb-3">
+                <img src="{% static '../static/images/static_images/no_image.jpg' %}" alt="Image 2" class="rounded-circle" style="width: 50px; height: 50px; margin-right: 10px;">
+                <h3 class="text-dark">Paedar Rader</h3>
+            </div>
+            <p class="text-dark">This is a description for the second column.</p>
+        </div>
+    </div>
+</div>
+
+<style>
+@keyframes rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+</style>
+{% endblock content %}

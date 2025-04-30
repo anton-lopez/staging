@@ -1,0 +1,12 @@
+{% extends 'review/base.html' %}
+{% block content %}
+{% load static %}
+<div class="container position-relative">
+    <div class="text-center position-absolute top-50 start-50 translate-middle" id="home_text">
+        <h1 class="text-primary display-2 bg-white p-4 bg-primary-subtle border border-primary-subtle rounded-pill" id = "header_home_font" style="--bs-bg-opacity: .9;">DormView</h1>
+        <a href="{% url 'dorm-list' %}" class="btn btn-primary btn-lg display-6">View Dorms</a>
+    </div>
+    <img src="{% static '../media/other_images/DormViewCompl.gif' %}" alt="Home Image" class="img-fluid" id = "gif_image">
+</div>
+    <!-- Add homepage content here -->
+{% endblock content %}
