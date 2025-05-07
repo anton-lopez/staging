@@ -5,7 +5,6 @@ from django.urls import reverse
 from PIL import Image
 import os
 from django.utils.text import slugify
-from django.contrib.postgres.fields import ArrayField
 
 
 class Dorm(models.Model):
