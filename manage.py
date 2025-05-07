@@ -17,9 +17,6 @@ def main():
             "forget to activate a virtual environment?"
         ) from exc
         
-    if 'runserver' in sys.argv:
-        subprocess.Popen(["python3", "manage.py", "run_roomgpt"])
-        
     execute_from_command_line(sys.argv)
 
 
